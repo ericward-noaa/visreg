@@ -43,7 +43,8 @@ setupF <- function(fit, xvar, call.env, data) {
     av <- get_all_vars(form, Data)    # https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=14905
   }
   f <- as.data.frame(av)
-
+  if (inherits(fit, 'sdmTMB')) f <- cbind(f, Data[,c(fit$mesh$xy_cols)]) # sdmTMB specific - XY cols aren't returned by get_all_vars()
+  
   if (inherits(CALL$random, "call")) {
     rf <- as.data.frame(as.list(get_all_vars(CALL$random, Data)))
     rf <- rf[, setdiff(names(rf), names(f)), drop=FALSE]

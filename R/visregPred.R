@@ -21,7 +21,11 @@ visregPred <- function(fit, Data, se.fit=FALSE, ...) {
       predict.args$se <- TRUE
       p <- suppressWarnings(do.call("predict", predict.args))
     } else {
-      predict.args$se.fit <- TRUE
+      if(inherits(fit, "sdmTMB")) {
+        predict.args$se_fit <- TRUE # sdmTMB names this se_fit rather than se.fit
+      } else {
+        predict.args$se.fit <- TRUE
+      }
       p <- suppressWarnings(do.call("predict", predict.args))
     }
   } else {
@@ -34,5 +38,11 @@ visregPred <- function(fit, Data, se.fit=FALSE, ...) {
     }
   }
   if (inherits(fit, "svm") && fit$type < 3) p <- attr(p, "probabilities")
+  if (inherits(fit, "sdmTMB")) {
+    plist <- list(fit = p$est) # dataframe returned by sdmTMB -> list
+    if(se.fit==TRUE) plist <- c(plist, list(se.fit = p$est_se)) 
+    p <- plist
+    if(length(p)==1) p <- p$fit # following lm/gam/etc, if SE not included a vector is returned
+  }
   p
 }
